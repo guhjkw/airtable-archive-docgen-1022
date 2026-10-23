@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Airtable Archive and Billing Docs</title>
+<meta name="description" content="A live preview of an Airtable archive for a millwork ERP: completed jobs move to a separate base with every sales, estimating and production link rebuilt and verified, plus AIA-style billing documents and work-order stickers generated from the record data.">
+<style>
+  :root { --bg:#0f1214; --surface:#161b1e; --surface-2:#1c2226; --border:#283036; --text:#e8edf0; --muted:#98a6ad; --gold:#e3b341; --good:#4ade80;
+          --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  * { box-sizing:border-box; } [hidden] { display:none !important; }
+  html { -webkit-text-size-adjust:100%; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.55 var(--sans); }
+  .wrap { max-width:1320px; margin:0 auto; padding:0 16px; }
+  .topbar { border-bottom:1px solid var(--border); } .topbar .wrap { display:flex; justify-content:space-between; align-items:center; gap:12px; padding-top:12px; padding-bottom:12px; }
+  .eyebrow { font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .pill { font-size:12px; border:1px solid var(--border); border-radius:999px; padding:3px 10px; color:var(--muted); white-space:nowrap; }
+  .hero { padding:34px 0 18px; } h1 { font-size:clamp(28px,4vw,42px); line-height:1.12; margin:6px 0 12px; letter-spacing:-.01em; max-width:30ch; }
+  .lede { color:var(--muted); font-size:18px; max-width:84ch; margin:0; } .lede strong { color:var(--text); }
+  section { padding:26px 0; } h2 { font-size:23px; margin:0 0 6px; } .sub { color:var(--muted); margin:0 0 18px; }
+  .benefits { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-top:22px; }
+  .benefits div { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 16px; font-size:15px; color:var(--muted); } .benefits b { color:var(--text); display:block; font-size:16px; margin-bottom:2px; }
+
+  /* ---------- app: Airtable ---------- */
+  .app { display:grid; grid-template-columns:minmax(0,1fr) 340px; border-radius:12px; overflow:hidden; border:1px solid #3a444a; box-shadow:0 20px 60px rgba(0,0,0,.45); background:#fff; color:#1d1f25; font:13px/1.45 -apple-system,"Segoe UI",Roboto,Arial,sans-serif; }
+  .at { min-width:0; display:flex; flex-direction:column; }
+  .bases { display:flex; gap:0; background:#1d1f25; } .bases button { border:0; background:transparent; color:#c4c7cf; padding:9px 14px; font:600 12.5px inherit; font-family:inherit; cursor:pointer; } .bases button[aria-selected=true] { background:#2d7ff9; color:#fff; } .bases button.arc[aria-selected=true] { background:#20c933; color:#0b2e10; }
+  .tbls { display:flex; gap:2px; background:#f2f4f8; border-bottom:1px solid #dfe2e8; padding:4px 6px 0; } .tbls button { border:0; background:transparent; padding:6px 12px; border-radius:6px 6px 0 0; font:12.5px inherit; font-family:inherit; cursor:pointer; color:#4c5361; } .tbls button[aria-selected=true] { background:#fff; font-weight:700; color:#1d1f25; box-shadow:0 -1px 0 #dfe2e8 inset; }
+  .grid { overflow:auto; max-height:430px; }
+  table.at-g { border-collapse:collapse; width:100%; font-size:12.5px; min-width:720px; }
+  table.at-g th { position:sticky; top:0; background:#f8f9fb; color:#4c5361; font-weight:600; text-align:left; border-bottom:1px solid #dfe2e8; border-right:1px solid #eceef2; padding:5px 8px; white-space:nowrap; }
+  table.at-g td { border-bottom:1px solid #eceef2; border-right:1px solid #f2f3f6; padding:5px 8px; vertical-align:top; }
+  .chip { display:inline-block; background:#e1edfd; color:#123e7c; border-radius:6px; padding:0 6px; margin:1px 3px 1px 0; font-size:11.5px; white-space:nowrap; } .arcbase .chip { background:#dcf6e1; color:#0b5a1c; }
+  .st { display:inline-block; border-radius:9px; padding:0 8px; font-size:11.5px; font-weight:600; } .st-c { background:#d1f7c4; color:#1b5e20; } .st-p { background:#ffeab6; color:#7a4a00; } .st-a { background:#e5e9f0; color:#4c5361; }
+  .mono { font-family:var(--mono); font-size:11.5px; color:#4c5361; }
+  .auto { background:#f8f9fb; border-left:1px solid #dfe2e8; padding:12px; min-width:0; }
+  .card { background:#fff; border:1px solid #dfe2e8; border-radius:8px; padding:10px; margin-bottom:10px; } .card h4 { margin:0 0 6px; font-size:13px; }
+  .card label { display:block; font-size:12px; font-weight:600; color:#4c5361; margin:6px 0 2px; } .card input, .card select { width:100%; font:13px inherit; font-family:inherit; border:1px solid #c9ced8; border-radius:6px; padding:5px 7px; }
+  .sw { display:flex !important; gap:6px; align-items:center; font-weight:500 !important; color:#1d1f25 !important; } .sw input { width:auto !important; }
+  .btn { font:700 12.5px inherit; font-family:inherit; border:1px solid #c9ced8; background:#fff; color:#1d1f25; border-radius:6px; padding:6px 11px; cursor:pointer; } .btn.primary { background:#2d7ff9; border-color:#2d7ff9; color:#fff; }
+  .res { border-radius:6px; padding:7px 9px; font-size:12.5px; margin-top:8px; } .res.ok { background:#e6f8ea; color:#0b5a1c; } .res.bad { background:#fde8e8; color:#8a1c1c; }
+  ol.log { margin:6px 0 0; padding-left:18px; font-size:12px; color:#4c5361; } ol.log li { margin:2px 0; }
+  .docs { grid-column:1/-1; border-top:1px solid #dfe2e8; background:#fbfbfd; padding:12px; min-width:0; }
+  .docsh { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; } .docsh b { font-size:14px; } .docsh select { font:13px inherit; font-family:inherit; border:1px solid #c9ced8; border-radius:6px; padding:4px 7px; }
+  .paper { background:#fff; border:1px solid #d9dce3; border-radius:6px; padding:12px; box-shadow:0 2px 8px rgba(0,0,0,.05); overflow-x:auto; }
+  .paper h5 { margin:0 0 6px; font-size:13px; } table.doc { border-collapse:collapse; width:100%; font-size:11.5px; min-width:860px; } table.doc th, table.doc td { border:1px solid #c9ced8; padding:3px 5px; text-align:right; } table.doc th { background:#f2f4f8; font-weight:600; text-align:center; } table.doc td:nth-child(2) { text-align:left; } table.doc tr.tot td { font-weight:700; background:#f8f9fb; }
+  .g702 { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; margin-top:10px; } .g702 div { border:1px solid #dfe2e8; border-radius:6px; padding:6px 8px; font-size:11.5px; color:#4c5361; } .g702 b { display:block; font-size:14px; color:#1d1f25; }
+  .stickers { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:8px; margin-top:10px; }
+  .sticker { border:1px dashed #9aa3b2; border-radius:6px; padding:8px; display:flex; gap:8px; align-items:center; background:#fff; } .sticker .qr { width:46px; height:46px; border:2px solid #1d1f25; display:grid; place-items:center; font:700 9px var(--mono); flex:0 0 46px; } .sticker b { display:block; font-size:13px; } .sticker small { color:#4c5361; display:block; font-size:11px; }
+  .warn { background:#fff4e5; border:1px solid #ffd79d; color:#7a4100; border-radius:6px; padding:6px 8px; margin-bottom:8px; font-size:12px; }
+
+  /* ---------- page ---------- */
+  .break { background:linear-gradient(0deg,rgba(45,127,249,.08),rgba(45,127,249,.08)),var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; }
+  .cards2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .panel { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; min-width:0; } .panel h3 { margin:0 0 6px; font-size:16px; } .panel p { margin:0; color:var(--muted); font-size:14.5px; }
+  ol.steps { list-style:none; counter-reset:s; padding:0; margin:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+  ol.steps li { counter-increment:s; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; font-size:15px; }
+  ol.steps li::before { content:counter(s); display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; background:var(--surface-2); border:1px solid var(--border); font-weight:700; margin-bottom:8px; }
+  ol.steps li.yours { border-color:var(--good); } .whom { display:block; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:4px; } li.yours .whom { color:var(--good); }
+  .tiers { display:grid; grid-template-columns:1fr 1.3fr 1fr; gap:14px; align-items:start; }
+  .tier { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; } .tier.featured { border:2px solid var(--gold); position:relative; }
+  .tier .badge2 { position:absolute; top:-12px; left:20px; background:var(--gold); color:#1a1405; font-weight:800; font-size:12px; letter-spacing:.05em; text-transform:uppercase; border-radius:6px; padding:3px 10px; }
+  .tier h3 { margin:0; font-size:18px; } .price { font-size:34px; font-weight:800; margin:6px 0 2px; } .price s { font-size:18px; color:var(--muted); font-weight:400; margin-left:8px; }
+  .tier .for { color:var(--muted); font-size:14px; margin:0 0 12px; } .tier ul { margin:0; padding-left:18px; font-size:14.5px; } .tier li { margin:4px 0; }
+  .stack { width:100%; border-collapse:collapse; font-size:14.5px; margin:10px 0 4px; } .stack td { padding:6px 0; border-bottom:1px solid var(--border); vertical-align:top; } .stack td:last-child { text-align:right; color:var(--muted); white-space:nowrap; padding-left:10px; }
+  .stack tr.bonus td:first-child::before { content:"Bonus · "; color:var(--gold); font-weight:700; } .stack tr.total td { border-bottom:0; font-weight:800; color:var(--text); padding-top:10px; } .stack tr.total td:last-child { color:var(--text); }
+  .ms { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-top:16px; }
+  .ms .tag2 { font-size:12px; color:var(--gold); text-transform:uppercase; letter-spacing:.06em; font-weight:700; } .ms .mp { font-size:26px; font-weight:800; margin:2px 0; } .ms .days { color:var(--muted); font-size:13px; }
+  .ms ul { margin:8px 0; padding-left:18px; font-size:14.5px; } .ms .acc { font-size:13.5px; color:var(--muted); border-top:1px solid var(--border); padding-top:8px; } .ms .acc b { color:var(--text); }
+  .costs { margin-top:14px; font-size:14.5px; color:var(--muted); } .costs b { color:var(--text); }
+  .cta { background:var(--surface); border:2px solid var(--good); border-radius:16px; padding:24px; } .cta h2 { font-size:24px; } .cta p { margin:6px 0 0; max-width:80ch; } .cta .urgency { color:var(--muted); font-size:14px; margin-top:12px; }
+  .need { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px 18px; padding-left:20px; margin:0; }
+  pre.tree { font:13px/1.6 var(--mono); background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; overflow-x:auto; margin:0 0 10px; }
+  footer { border-top:1px solid var(--border); margin-top:18px; padding:22px 0 40px; color:var(--muted); font-size:14px; } footer p { margin:0 0 8px; max-width:95ch; }
+  @media (max-width:1060px) { .app { grid-template-columns:1fr; } .auto { border-left:0; border-top:1px solid #dfe2e8; } .g702 { grid-template-columns:1fr 1fr; } }
+  @media (max-width:980px) { .cards2, .ms, .tiers, .benefits { grid-template-columns:1fr; } ol.steps { grid-template-columns:1fr 1fr; } .tier.featured { order:-1; } }
+  @media (max-width:560px) { ol.steps, .need { grid-template-columns:1fr; } .pill { display:none; } }
+  @media (prefers-reduced-motion:reduce) { * { transition:none !important; animation:none !important; } }
+</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap"><span class="eyebrow">Airtable · archive + document generation · Live preview</span><span class="pill">Sample jobs · invented data</span></div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <span class="eyebrow">For a custom millwork company running its ERP on Airtable</span>
+    <h1>Completed jobs leave the active base with every link intact, and the billing paperwork writes itself from the records.</h1>
+    <p class="lede"><strong>This is a working preview, not a video.</strong> Pick a completed job and archive it: the sales, estimating and production records are copied to a separate base, re-linked to each other, checked, and only then removed. Then pick any job below to see its Schedule of Values, the pay-application summary and the work-order stickers, all worked out from the same records.</p>
+    <div class="benefits">
+      <div><b>Still one project</b>An archived job keeps its estimate lines and work orders linked, so it’s still traceable end to end in the archive base.</div>
+      <div><b>Checked before anything is deleted</b>Counts and links are compared first. If a single write fails, the copy is rolled back and the active base isn’t touched.</div>
+      <div><b>No drag-and-drop paperwork</b>Billing figures, retainage and stickers come straight from the record data the moment a status changes.</div>
+    </div>
+  </div>
+
+  <div class="app" id="app" aria-label="Airtable archive and documents preview">
+    <div class="at">
+      <div class="bases" role="tablist">
+        <button type="button" role="tab" data-base="active" aria-selected="true" data-testid="base-active">Millwork ERP <span id="cActive"></span></button>
+        <button type="button" role="tab" data-base="archive" class="arc" aria-selected="false" data-testid="base-archive">Millwork Archive <span id="cArchive"></span></button>
+      </div>
+      <div class="tbls" role="tablist">
+        <button type="button" role="tab" data-tbl="sales" aria-selected="true" data-testid="tbl-sales">Sales</button>
+        <button type="button" role="tab" data-tbl="estimates" aria-selected="false" data-testid="tbl-estimates">Estimating</button>
+        <button type="button" role="tab" data-tbl="production" aria-selected="false" data-testid="tbl-production">Production</button>
+      </div>
+      <div class="grid" id="grid" data-testid="grid"></div>
+    </div>
+    <aside class="auto" aria-label="Archive automation">
+      <div class="card"><h4>Automation: archive a completed job</h4>
+        <label for="aJob">Job</label><select id="aJob" data-testid="a-job"></select>
+        <label for="aMode">After the copy is verified</label><select id="aMode" data-testid="a-mode"><option value="delete">Remove from the active base</option><option value="mark">Keep a stub marked Archived</option></select>
+        <label for="aLimit">Archive base record limit (your plan)</label><input id="aLimit" type="number" min="1" value="50000" data-testid="a-limit">
+        <label class="sw"><input type="checkbox" id="aFail" data-testid="a-fail"> Test: make the 2nd production write fail</label>
+        <div style="margin-top:8px"><button type="button" class="btn primary" id="aRun" data-testid="a-run">Run archive</button> <button type="button" class="btn" id="reset" data-testid="reset">Reset bases</button></div>
+        <div id="aRes" data-testid="a-res" role="status"></div>
+        <ol class="log" id="aLog" data-testid="a-log"></ol>
+      </div>
+    </aside>
+    <div class="docs" aria-label="Documents">
+      <div class="docsh"><b>Documents</b><label for="dJob" style="font-size:12px;color:#4c5361">Job</label><select id="dJob" data-testid="d-job"></select><span style="font-size:12px;color:#4c5361">from <span id="dBase"></span></span></div>
+      <div id="doc" data-testid="doc"></div>
+    </div>
+  </div>
+
+  <section aria-label="Try to break it">
+    <div class="break"><strong>Try to break it.</strong> Archive J-2052 (still in production). Archive J-2033: one of its work orders is shared with another live job. Tick the failed-write test and archive J-2041. Archive J-2041 twice. Set the archive limit to 10. Switch to “Keep a stub”. Then open the archive base and check the links.</div>
+  </section>
+
+  <section aria-labelledby="qa-h">
+    <h2 id="qa-h">What your post asked for</h2>
+    <p class="sub">Straight answers. The preview runs the logic behind both phases.</p>
+    <div class="cards2">
+      <div class="panel"><h3>Archiving with links intact</h3><p>Links can’t point across bases, so they’re rebuilt: parents first, then children, each carrying its original record ID and a shared Project ID, re-linked by those IDs, counted and checked, and only then removed or marked in the active base.</p></div>
+      <div class="panel"><h3>Airtable builds</h3><p>A six-month Bubble to Airtable migration through Make.com, plus Airtable automation and support for four other clients in Make.com and n8n. Client bases are private; happy to screen-share a live build on a call.</p></div>
+      <div class="panel"><h3>Doc-gen tools</h3><p>Not from Airtable for a client yet, so I won’t claim it. I’d start with Documint for the AIA forms and purchase orders (it reads Airtable records and line items) and test PDFMonkey next to it for the stickers, with QR codes generated as images from the record ID.</p></div>
+      <div class="panel"><h3>Availability and timeline</h3><p>Phase 1 within a week of access, Phase 2 within a week of choosing the doc-gen tool, with a Loom walkthrough at the end of each phase.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="how-h">
+    <h2 id="how-h">How it works</h2>
+    <p class="sub">Four steps, one of them yours.</p>
+    <ol class="steps">
+      <li><span class="whom">Me</span>Map every linked field across sales, estimating and production, and build the archive base to mirror them.</li>
+      <li class="yours"><span class="whom">You</span>Confirm which status triggers the archive, and whether jobs are removed or kept as stubs.</li>
+      <li><span class="whom">Me</span>Build the archive automation, run it on a copy of your base, then live. Loom walkthrough.</li>
+      <li><span class="whom">Me</span>Phase 2: pick the doc-gen tool together, build the four documents on status triggers. Loom walkthrough.</li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="price-h">
+    <h2 id="price-h">Packages</h2>
+    <p class="sub">Fixed price per phase, paid through Upwork, or hourly at $30/hr if you prefer.</p>
+    <div class="tiers">
+      <div class="tier"><h3>Phase 1: archive</h3><div class="price">$450</div><p class="for">Completed jobs out of the active base, links intact.</p>
+        <ul><li>Archive base mirroring your tables</li><li>Status-triggered archive with verification</li><li>Rollback on failure, alert to you</li></ul></div>
+      <div class="tier featured" data-testid="featured"><span class="badge2">Best value</span><h3>Both phases</h3>
+        <div class="price">$950<s>$1,900</s></div><p class="for">The whole post: archive plus the four documents.</p>
+        <table class="stack" aria-label="What is included">
+          <tr><td>Archive base and link-preserving automation</td><td>$450</td></tr>
+          <tr><td>Verification, rollback and failure alerts</td><td>$250</td></tr>
+          <tr><td>Purchase orders and AIA billing forms</td><td>$400</td></tr>
+          <tr><td>Schedule of Values from estimate and production data</td><td>$300</td></tr>
+          <tr><td>Work-order stickers with QR codes</td><td>$200</td></tr>
+          <tr class="bonus"><td>Dry run on a copy of your base first</td><td>$150</td></tr>
+          <tr class="bonus"><td>Loom walkthrough after each phase</td><td>$150</td></tr>
+          <tr class="total"><td>Value if bought separately</td><td>$1,900</td></tr>
+        </table></div>
+      <div class="tier"><h3>Both + 30 days</h3><div class="price">$1,250</div><p class="for">For the first month-end close on the new setup.</p>
+        <ul><li>Everything in the $950 package</li><li>30 days of fixes and tweaks</li><li>Archive search view for the office</li></ul></div>
+    </div>
+    <div class="ms">
+      <div class="panel"><span class="tag2">Milestone 1</span><div class="mp">$450</div><div class="days">within a week</div><ul><li>Archive base and automation</li><li>Dry run on a copy, then live</li></ul><div class="acc"><b>Done when:</b> a completed job moves with every link intact, checked.</div></div>
+      <div class="panel"><span class="tag2">Milestone 2</span><div class="mp">$300</div><div class="days">about 4 days</div><ul><li>Doc-gen tool chosen together</li><li>Schedule of Values and AIA forms</li></ul><div class="acc"><b>Done when:</b> a pay application generates from a status change.</div></div>
+      <div class="panel"><span class="tag2">Milestone 3</span><div class="mp">$200</div><div class="days">about 3 days</div><ul><li>Purchase orders and stickers</li><li>Loom walkthrough</li></ul><div class="acc"><b>Done when:</b> POs and stickers print from the records with no manual steps.</div></div>
+    </div>
+    <p class="costs"><b>Third-party costs:</b> your Airtable plan and Make.com (if used), plus the doc-gen tool’s own subscription.</p>
+  </section>
+
+  <section aria-label="Next step">
+    <div class="cta"><h2>Send me a copy of the base (data optional).</h2>
+      <p>Reply in our Upwork chat with a duplicate of the base, with or without records. I’ll map your real tables and links into this preview so you can see your own archive run before you hire anyone.</p>
+      <p class="urgency">I can start this week.</p></div>
+  </section>
+
+  <section aria-labelledby="need-h">
+    <h2 id="need-h">What I need from you to start</h2>
+    <ul class="need"><li>Creator access to the ERP base.</li><li>Which status marks a job complete.</li><li>A sample PO, AIA form and sticker you use today.</li><li>Your Make.com account, if we use it.</li></ul>
+  </section>
+
+  <section aria-labelledby="hood-h">
+    <h2 id="hood-h">Under the hood</h2>
+    <pre class="tree">airtable-archive-docgen/
+  index.html               this page
+  src/archiveEngine.js     collect a job, copy and re-link, verify, roll back, Schedule of Values, pay summary, stickers
+  data/sample.json         invented jobs, estimate lines and work orders
+  tests/verify.js          27 tests against src/archiveEngine.js
+  tests/browser-check.py   drives this page in a real browser</pre>
+    <p class="sub">The page and the tests load the same engine file, so what you just used is what was tested. Hand src/ and tests/ to your developer, or never open them.</p>
+  </section>
+</main>
+
+<footer><div class="wrap">
+  <p>Built from the job post. Every job, client, amount and work order is invented, and nothing here is connected to Airtable, Make.com or a doc-gen tool. The documents are shown as tables here; in your build they are PDFs from the tool you choose, and the sticker codes become real QR images. The archive, re-linking, verification, rollback and billing calculations and the 27 passing tests are real. No prior build for your company is claimed. This page will be taken down about 30 days after it was sent.</p>
+  <p>Built by Taiwo, Pathfinder Automation Solutions.</p>
+</div></footer>
+
+<script src="src/archiveEngine.js"></script>
+<script>
+(function () {
+  'use strict';
+  var FALLBACK = {"_note":"Invented Airtable records for a custom millwork company. Jobs, clients, amounts and work orders are made up. No real client data.","active":{"sales":[{"id":"recS1","job":"J-2041","client":"Harbor Point Medical","project":"Lobby and nurse station millwork","status":"Complete","contract":184000,"retainagePct":10},{"id":"recS2","job":"J-2052","client":"Linden Street Lofts","project":"Kitchen cabinetry, 24 units","status":"In production","contract":96500,"retainagePct":5},{"id":"recS3","job":"J-2033","client":"Crescent Bank","project":"Teller line, main branch","status":"Complete","contract":58000,"retainagePct":10},{"id":"recS4","job":"J-2060","client":"Crescent Bank","project":"Teller line, branch 2","status":"In production","contract":61000,"retainagePct":10},{"id":"recS5","job":"J-2019","client":"Oak and Iron Bistro","project":"Bar front and back bar","status":"Complete","contract":41500,"retainagePct":5}],"estimates":[{"id":"recE1","sales":["recS1"],"item":"Reception desk","scheduledValue":62000,"prevPct":80},{"id":"recE2","sales":["recS1"],"item":"Nurse station casework","scheduledValue":78000,"prevPct":75},{"id":"recE3","sales":["recS1"],"item":"Walnut wall paneling","scheduledValue":44000,"prevPct":90},{"id":"recE4","sales":["recS2"],"item":"Kitchen cabinets","scheduledValue":81000,"prevPct":30},{"id":"recE5","sales":["recS2"],"item":"Bathroom vanities","scheduledValue":15500,"prevPct":0},{"id":"recE6","sales":["recS3"],"item":"Teller line","scheduledValue":58000,"prevPct":100},{"id":"recE7","sales":["recS4"],"item":"Teller line","scheduledValue":61000,"prevPct":0},{"id":"recE8","sales":["recS5"],"item":"Bar front","scheduledValue":24000,"prevPct":100},{"id":"recE9","sales":["recS5"],"item":"Back bar","scheduledValue":17500,"prevPct":100}],"production":[{"id":"recP1","sales":["recS1"],"estimates":["recE1"],"workOrder":"WO-3301","part":"Desk shell","pctComplete":100,"materialsStored":0},{"id":"recP2","sales":["recS1"],"estimates":["recE1"],"workOrder":"WO-3302","part":"Desk transaction top","pctComplete":100,"materialsStored":0},{"id":"recP3","sales":["recS1"],"estimates":["recE2"],"workOrder":"WO-3310","part":"Nurse station uppers","pctComplete":100,"materialsStored":0},{"id":"recP4","sales":["recS1"],"estimates":["recE2"],"workOrder":"WO-3311","part":"Nurse station lowers","pctComplete":100,"materialsStored":0},{"id":"recP5","sales":["recS1"],"estimates":["recE3"],"workOrder":"WO-3320","part":"Walnut panels","pctComplete":100,"materialsStored":0},{"id":"recP6","sales":["recS2"],"estimates":["recE4"],"workOrder":"WO-3401","part":"Cabinet boxes, units 1-12","pctComplete":60,"materialsStored":4200},{"id":"recP7","sales":["recS2"],"estimates":["recE4"],"workOrder":"WO-3402","part":"Cabinet boxes, units 13-24","pctComplete":20,"materialsStored":0},{"id":"recP8","sales":["recS2"],"estimates":["recE5"],"workOrder":"WO-3410","part":"Vanities","pctComplete":10,"materialsStored":1100},{"id":"recP9","sales":["recS3","recS4"],"estimates":["recE6"],"workOrder":"WO-3201","part":"Teller line, shared hardware order","pctComplete":100,"materialsStored":0},{"id":"recP10","sales":["recS4"],"estimates":["recE7"],"workOrder":"WO-3501","part":"Teller line, branch 2","pctComplete":40,"materialsStored":0},{"id":"recP11","sales":["recS5"],"estimates":["recE8"],"workOrder":"WO-3101","part":"Bar front","pctComplete":100,"materialsStored":0},{"id":"recP12","sales":["recS5"],"estimates":["recE9"],"workOrder":"WO-3102","part":"Back bar","pctComplete":100,"materialsStored":0}]},"archive":{"sales":[{"id":"arc0001","sourceId":"recS0","projectId":"J-1988","job":"J-1988","client":"Westgate Library","project":"Circulation desk","status":"Complete","contract":37000,"retainagePct":5}],"estimates":[{"id":"arc0002","sourceId":"recE0","projectId":"J-1988","sales":["arc0001"],"item":"Circulation desk","scheduledValue":37000,"prevPct":100}],"production":[{"id":"arc0003","sourceId":"recP0","projectId":"J-1988","sales":["arc0001"],"estimates":["arc0002"],"workOrder":"WO-2901","part":"Circulation desk","pctComplete":100,"materialsStored":0}]}};
+  var A = window.ArchiveEngine;
+  var $ = function (id) { return document.getElementById(id); };
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function esc(s) { return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function money(n) { return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  var D, active, arch, base = 'active', tbl = 'sales';
+
+  function label(b, id) { var all = b.sales.concat(b.estimates, b.production), r = all.filter(function (x) { return x.id === id; })[0]; return r ? (r.job || r.item || r.workOrder) : id; }
+  function chips(b, ids) { return (ids || []).map(function (id) { return '<span class="chip">' + esc(label(b, id)) + '</span>'; }).join(''); }
+  function stat(x) { return x.archived ? '<span class="st st-a">Archived</span>' : '<span class="st ' + (x.status === 'Complete' ? 'st-c' : 'st-p') + '">' + esc(x.status) + '</span>'; }
+
+  function load(d) { D = d; active = clone(D.active); arch = clone(D.archive); $('aRes').innerHTML = ''; $('aLog').innerHTML = ''; render(); }
+  function render() {
+    $('cActive').textContent = '(' + A.count(active) + ')'; $('cArchive').textContent = '(' + A.count(arch) + ')';
+    document.querySelectorAll('.bases button').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.base === base ? 'true' : 'false'); });
+    document.querySelectorAll('.tbls button').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.tbl === tbl ? 'true' : 'false'); });
+    var b = base === 'active' ? active : arch, src = base === 'archive';
+    var head, body;
+    if (tbl === 'sales') {
+      head = ['Job', 'Client', 'Project', 'Status', 'Contract', 'Retainage'].concat(src ? ['Source Record ID'] : []);
+      body = b.sales.map(function (x) { return '<tr data-testid="row"><td><b>' + esc(x.job) + '</b></td><td>' + esc(x.client) + '</td><td>' + esc(x.project) + '</td><td>' + stat(x) + '</td><td>' + money(x.contract) + '</td><td>' + x.retainagePct + '%</td>' + (src ? '<td class="mono">' + esc(x.sourceId) + '</td>' : '') + '</tr>'; });
+    } else if (tbl === 'estimates') {
+      head = ['Line item', 'Sales (linked)', 'Scheduled value', 'Previous %'].concat(src ? ['Source Record ID'] : []);
+      body = b.estimates.map(function (x) { return '<tr data-testid="row"><td>' + esc(x.item) + '</td><td data-testid="links">' + chips(b, x.sales) + '</td><td>' + money(x.scheduledValue) + '</td><td>' + x.prevPct + '%</td>' + (src ? '<td class="mono">' + esc(x.sourceId) + '</td>' : '') + '</tr>'; });
+    } else {
+      head = ['Work order', 'Part', 'Sales (linked)', 'Estimate (linked)', '% complete', 'Stored'].concat(src ? ['Source Record ID'] : []);
+      body = b.production.map(function (x) { return '<tr data-testid="row"><td><b>' + esc(x.workOrder) + '</b></td><td>' + esc(x.part) + '</td><td data-testid="links">' + chips(b, x.sales) + '</td><td>' + chips(b, x.estimates) + '</td><td>' + x.pctComplete + '%</td><td>' + money(x.materialsStored) + '</td>' + (src ? '<td class="mono">' + esc(x.sourceId) + '</td>' : '') + '</tr>'; });
+    }
+    $('grid').className = 'grid' + (src ? ' arcbase' : '');
+    $('grid').innerHTML = '<table class="at-g"><thead><tr>' + head.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr></thead><tbody>' + body.join('') + '</tbody></table>' + (body.length ? '' : '<p style="padding:10px;color:#4c5361">No records.</p>');
+    // job pickers
+    var keepA = $('aJob').value, keepD = $('dJob').value;
+    $('aJob').innerHTML = active.sales.filter(function (x) { return !x.archived; }).map(function (x) { return '<option value="' + x.id + '">' + esc(x.job + ' · ' + x.client + ' (' + x.status + ')') + '</option>'; }).join('');
+    if (keepA && [].some.call($('aJob').options, function (o) { return o.value === keepA; })) $('aJob').value = keepA;
+    var docJobs = active.sales.filter(function (x) { return !x.archived; }).map(function (x) { return { v: 'A:' + x.id, t: x.job + ' · ' + x.client }; })
+      .concat(arch.sales.map(function (x) { return { v: 'R:' + x.id, t: x.job + ' · ' + x.client + ' (archive)' }; }));
+    $('dJob').innerHTML = docJobs.map(function (o) { return '<option value="' + o.v + '">' + esc(o.t) + '</option>'; }).join('');
+    if (keepD && docJobs.some(function (o) { return o.v === keepD; })) $('dJob').value = keepD; else { var lin = docJobs.filter(function (o) { return /J-2052/.test(o.t); })[0]; if (lin) $('dJob').value = lin.v; }
+    renderDoc();
+  }
+  function renderDoc() {
+    var v = $('dJob').value; if (!v) { $('doc').innerHTML = ''; return; }
+    var fromArc = v.charAt(0) === 'R', s = A.scheduleOfValues(fromArc ? arch : active, v.slice(2));
+    $('dBase').textContent = fromArc ? 'the archive base' : 'the active base';
+    if (s.error) { $('doc').innerHTML = '<div class="warn">' + esc(s.error) + '</div>'; return; }
+    var t = s.totals, g = s.g702;
+    $('doc').innerHTML = s.problems.map(function (p) { return '<div class="warn" data-testid="doc-warn">Held for review: ' + esc(p) + '</div>'; }).join('') +
+      '<div class="paper"><h5>Continuation sheet (G703 style) · ' + esc(s.job + ' · ' + s.client + ' · ' + s.project) + '</h5><table class="doc" data-testid="sov"><thead><tr><th>Item</th><th>Description</th><th>Scheduled value</th><th>From previous</th><th>This period</th><th>Materials stored</th><th>Completed and stored</th><th>%</th><th>Balance to finish</th><th>Retainage</th></tr></thead><tbody>' +
+      s.lines.map(function (l) { return '<tr><td>' + l.item + '</td><td>' + esc(l.description) + '</td><td>' + money(l.scheduledValue) + '</td><td>' + money(l.fromPrevious) + '</td><td>' + money(l.thisPeriod) + '</td><td>' + money(l.stored) + '</td><td>' + money(l.totalCompleted) + '</td><td>' + l.pct + '%</td><td>' + money(l.balance) + '</td><td>' + money(l.retainage) + '</td></tr>'; }).join('') +
+      '<tr class="tot"><td></td><td>Totals</td><td>' + money(t.scheduledValue) + '</td><td>' + money(t.fromPrevious) + '</td><td>' + money(t.thisPeriod) + '</td><td>' + money(t.stored) + '</td><td>' + money(t.totalCompleted) + '</td><td></td><td>' + money(t.balance) + '</td><td>' + money(t.retainage) + '</td></tr></tbody></table>' +
+      '<div class="g702" data-testid="g702"><div>Contract sum<b>' + money(g.contractSum) + '</b></div><div>Completed and stored<b>' + money(g.completedAndStored) + '</b></div><div>Retainage<b>' + money(g.retainage) + '</b></div><div>Earned less retainage<b>' + money(g.earnedLessRetainage) + '</b></div><div>Less previous certificates<b>' + money(g.previousCertificates) + '</b></div><div>Current payment due<b data-testid="due">' + money(g.currentPaymentDue) + '</b></div><div>Balance to finish, incl. retainage<b>' + money(g.balanceToFinish) + '</b></div></div></div>' +
+      '<div class="stickers" data-testid="stickers">' + s.stickers.map(function (k) { return '<div class="sticker" data-testid="sticker"><span class="qr">QR</span><div><b>' + esc(k.workOrder) + '</b><small>' + esc(k.part) + '</small><small>' + esc(k.job) + '</small><small class="mono">' + esc(k.code) + '</small></div></div>'; }).join('') + '</div>';
+  }
+
+  $('aRun').addEventListener('click', function () {
+    var r = A.archive(active, arch, $('aJob').value, { mode: $('aMode').value, recordLimit: Math.max(1, Number($('aLimit').value) || 50000), failAt: $('aFail').checked ? { table: 'production', n: 2 } : null });
+    $('aRes').innerHTML = '<div class="res ' + (r.ok ? 'ok' : 'bad') + '">' + esc(r.ok ? 'Archived: ' + r.moved + ' records moved, links rebuilt and verified.' : r.reason) + '</div>';
+    $('aLog').innerHTML = r.log.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('');
+    active = r.active; arch = r.archive; render();
+  });
+  $('reset').addEventListener('click', function () { $('aFail').checked = false; $('aMode').selectedIndex = 0; $('aLimit').value = 50000; load(D); });
+  document.querySelector('.bases').addEventListener('click', function (e) { var b = e.target.closest('[data-base]'); if (!b) return; base = b.dataset.base; render(); });
+  document.querySelector('.tbls').addEventListener('click', function (e) { var b = e.target.closest('[data-tbl]'); if (!b) return; tbl = b.dataset.tbl; render(); });
+  $('dJob').addEventListener('change', renderDoc);
+
+  fetch('data/sample.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(load).catch(function () { load(FALLBACK); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+{
+  "_note": "Invented Airtable records for a custom millwork company. Jobs, clients, amounts and work orders are made up. No real client data.",
+  "active": {
+    "sales": [
+      {"id": "recS1", "job": "J-2041", "client": "Harbor Point Medical", "project": "Lobby and nurse station millwork", "status": "Complete", "contract": 184000, "retainagePct": 10},
+      {"id": "recS2", "job": "J-2052", "client": "Linden Street Lofts", "project": "Kitchen cabinetry, 24 units", "status": "In production", "contract": 96500, "retainagePct": 5},
+      {"id": "recS3", "job": "J-2033", "client": "Crescent Bank", "project": "Teller line, main branch", "status": "Complete", "contract": 58000, "retainagePct": 10},
+      {"id": "recS4", "job": "J-2060", "client": "Crescent Bank", "project": "Teller line, branch 2", "status": "In production", "contract": 61000, "retainagePct": 10},
+      {"id": "recS5", "job": "J-2019", "client": "Oak and Iron Bistro", "project": "Bar front and back bar", "status": "Complete", "contract": 41500, "retainagePct": 5}
+    ],
+    "estimates": [
+      {"id": "recE1", "sales": ["recS1"], "item": "Reception desk", "scheduledValue": 62000, "prevPct": 80},
+      {"id": "recE2", "sales": ["recS1"], "item": "Nurse station casework", "scheduledValue": 78000, "prevPct": 75},
+      {"id": "recE3", "sales": ["recS1"], "item": "Walnut wall paneling", "scheduledValue": 44000, "prevPct": 90},
+      {"id": "recE4", "sales": ["recS2"], "item": "Kitchen cabinets", "scheduledValue": 81000, "prevPct": 30},
+      {"id": "recE5", "sales": ["recS2"], "item": "Bathroom vanities", "scheduledValue": 15500, "prevPct": 0},
+      {"id": "recE6", "sales": ["recS3"], "item": "Teller line", "scheduledValue": 58000, "prevPct": 100},
+      {"id": "recE7", "sales": ["recS4"], "item": "Teller line", "scheduledValue": 61000, "prevPct": 0},
+      {"id": "recE8", "sales": ["recS5"], "item": "Bar front", "scheduledValue": 24000, "prevPct": 100},
+      {"id": "recE9", "sales": ["recS5"], "item": "Back bar", "scheduledValue": 17500, "prevPct": 100}
+    ],
+    "production": [
+      {"id": "recP1", "sales": ["recS1"], "estimates": ["recE1"], "workOrder": "WO-3301", "part": "Desk shell", "pctComplete": 100, "materialsStored": 0},
+      {"id": "recP2", "sales": ["recS1"], "estimates": ["recE1"], "workOrder": "WO-3302", "part": "Desk transaction top", "pctComplete": 100, "materialsStored": 0},
+      {"id": "recP3", "sales": ["recS1"], "estimates": ["recE2"], "workOrder": "WO-3310", "part": "Nurse station uppers", "pctComplete": 100, "materialsStored": 0},
+      {"id": "recP4", "sales": ["recS1"], "estimates": ["recE2"], "workOrder": "WO-3311", "part": "Nurse station lowers", "pctComplete": 100, "materialsStored": 0},
+      {"id": "recP5", "sales": ["recS1"], "estimates": ["recE3"], "workOrder": "WO-3320", "part": "Walnut panels", "pctComplete": 100, "materialsStored": 0},
+      {"id": "recP6", "sales": ["recS2"], "estimates": ["recE4"], "workOrder": "WO-3401", "part": "Cabinet boxes, units 1-12", "pctComplete": 60, "materialsStored": 4200},
+      {"id": "recP7", "sales": ["recS2"], "estimates": ["recE4"], "workOrder": "WO-3402", "part": "Cabinet boxes, units 13-24", "pctComplete": 20, "materialsStored": 0},
+      {"id": "recP8", "sales": ["recS2"], "estimates": ["recE5"], "workOrder": "WO-3410", "part": "Vanities", "pctComplete": 10, "materialsStored": 1100},
+      {"id": "recP9", "sales": ["recS3", "recS4"], "estimates": ["recE6"], "workOrder": "WO-3201", "part": "Teller line, shared hardware order", "pctComplete": 100, "materialsStored": 0},
+      {"id": "recP10", "sales": ["recS4"], "estimates": ["recE7"], "workOrder": "WO-3501", "part": "Teller line, branch 2", "pctComplete": 40, "materialsStored": 0},
+      {"id": "recP11", "sales": ["recS5"], "estimates": ["recE8"], "workOrder": "WO-3101", "part": "Bar front", "pctComplete": 100, "materialsStored": 0},
+      {"id": "recP12", "sales": ["recS5"], "estimates": ["recE9"], "workOrder": "WO-3102", "part": "Back bar", "pctComplete": 100, "materialsStored": 0}
+    ]
+  },
+  "archive": {
+    "sales": [{"id": "arc0001", "sourceId": "recS0", "projectId": "J-1988", "job": "J-1988", "client": "Westgate Library", "project": "Circulation desk", "status": "Complete", "contract": 37000, "retainagePct": 5}],
+    "estimates": [{"id": "arc0002", "sourceId": "recE0", "projectId": "J-1988", "sales": ["arc0001"], "item": "Circulation desk", "scheduledValue": 37000, "prevPct": 100}],
+    "production": [{"id": "arc0003", "sourceId": "recP0", "projectId": "J-1988", "sales": ["arc0001"], "estimates": ["arc0002"], "workOrder": "WO-2901", "part": "Circulation desk", "pctComplete": 100, "materialsStored": 0}]
+  }
+}

@@ -1,0 +1,42 @@
+127.0.0.1 - - [22/Oct/2026 23:36:55] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 23:36:55] "GET /src/archiveEngine.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 23:36:55] "GET /data/sample.json HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 23:36:56] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 23:36:56] "GET /src/archiveEngine.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 23:36:56] "GET /data/sample.json HTTP/1.1" 200 -
+0. HTML tag balance
+PASS: all tags closed and nested
+
+1. Bases
+PASS: active base shows 5 sales records, 26 records in total
+PASS: archive base starts with 3 records
+PASS: documents default to J-2052 with current payment due $14,202.50
+
+2. Refusals
+PASS: in-production job refused
+PASS: shared work order stops the archive
+PASS: archive limit 10 refused before copying
+PASS: failed write: rolled back, active base still 26
+PASS: the log says the copy was rolled back
+
+3. Archive J-2041
+PASS: 9 records moved and verified
+PASS: J-2041 no longer offered for archiving
+PASS: in the archive, WO-3320 still links to J-2041 and its estimate line
+PASS: documents still generate from the archived job
+
+4. Keep a stub
+PASS: stub mode: Oak and Iron marked Archived, active count unchanged
+
+5. Documents
+PASS: Schedule of Values: kitchen cabinets this period $8,100.00, total $36,600.00
+PASS: 3 work-order stickers with codes
+PASS: reset restores both bases
+
+6. Phone width
+PASS: no horizontal page scroll at 390px
+
+7. Console
+PASS: zero console or page errors
+
+19 passed, 0 failed

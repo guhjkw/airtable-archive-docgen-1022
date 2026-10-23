@@ -1,0 +1,40 @@
+1. Collecting a job
+PASS: J-2041 has 3 estimates and 5 production records
+PASS: a work order linked to two jobs is flagged as shared
+
+2. Archiving a complete job
+PASS: archive succeeds and moves 9 records
+PASS: active base goes from 26 to 17 records, archive from 3 to 12
+PASS: every archived record keeps its Source Record ID and the Project ID
+PASS: estimates are re-linked to the NEW sales record, not the old one
+PASS: a work order still traces to its estimate line (Walnut wall paneling)
+PASS: the log records the verification step
+PASS: the original input objects are not modified
+
+3. Refusals
+PASS: job not Complete: refused
+PASS: shared work order: stopped, nothing moved
+PASS: same job twice: no duplicate in the archive
+PASS: archive base near its limit: refused before copying
+PASS: unknown job: refused
+
+4. A failed write rolls everything back
+PASS: failure at the 2nd production write: not ok, rolled back
+PASS: archive back to its original 3 records
+PASS: active base untouched (26 records)
+
+5. Mark instead of delete
+PASS: mark mode keeps stubs in the active base, marked Archived
+PASS: each stub points at its archive copy
+
+6. Schedule of Values (G703) and summary (G702)
+PASS: two lines, scheduled values add up to the $96,500 contract
+PASS: kitchen cabinets: average of two work orders (60% and 20%) = 40%
+PASS: materials stored added to total completed: $36,600 (45.2%)
+PASS: retainage 5% of completed and stored: $1,962.50
+PASS: current payment due: $14,202.50
+PASS: balance to finish including retainage: $59,212.50
+PASS: one sticker per work order, with a scannable code value
+PASS: scheduled values not matching the contract are flagged
+
+27 passed, 0 failed
